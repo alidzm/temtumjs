@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const secp256k1 = require('secp256k1');
+const { genesis } = require('../genesis');
 
 class Transaction {
   static getTimestamp() {
@@ -62,6 +63,7 @@ class Transaction {
   }
 
   constructor() {
+    this.counter = 0;
     this.type = 'regular';
     this.txIns = [];
     this.txOuts = [];
@@ -105,16 +107,28 @@ class Transaction {
 
     this.timestamp = Transaction.getTimestamp();
     this.txIns = utxo;
-    this.txOuts = [
-      {
-        address: recipientAddress,
-        amount
-      },
-      {
-        address: senderAddress,
-        amount: restAmount
-      }
-    ];
+
+    this.txOuts = [];
+
+    // this.txOuts = [
+    //   {
+    //     address: recipientAddress,
+    //     amount
+    //   },
+    //   {
+    //     address: senderAddress,
+    //     amount: restAmount
+    //   }
+    // ];
+
+    let spentAmount = 0;
+
+    for(let i = 0; i < 99; i++) {
+      this.txOuts.push({ address: genesis.data[1].txOuts[0].address, amount: 1 });
+      spentAmount++;
+    }
+
+    this.txOuts.push({ address: senderAddress, amount: totalAmount - spentAmount });
 
     this.sign(utxo, privateKey);
 
